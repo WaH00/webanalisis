@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analysis - Naive Bayes</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Prediksi Sentimen</a>
+        <a href="/visualisasi">Visualisasi Model</a>
+    </nav>
+    <div class="container">
+        <h1>🧠 Sentiment Analysis Pada Aplikasi Sekuritas di Indonesia (Naive Bayes)</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <textarea name="review" rows="5" placeholder="Masukkan teks review..."></textarea><br>
+            <button type="submit">Prediksi</button>
+            <span style="margin:0 10px;">atau</span>
+            <label for="csv_file" class="csv-upload-btn">
+                <i class="fa-solid fa-file-csv"></i> Upload CSV
+                <input type="file" id="csv_file" name="csv_file" accept=".csv" style="display:none" onchange="this.form.submit()">
+            </label>
+        </form>
+
+        {% if prediction %}
+            <div class="result">
+                <h3>{{ prediction }}</h3>
+            </div>
+        {% endif %}
+
+        {% if csv_results %}
+            <div class="result" id="csv-result-box" style="margin-top:24px; max-height:300px; overflow-y:auto;">
+                {% if csv_results.error %}
+                    <div style="color:red;">{{ csv_results.error }}</div>
+                {% else %}
+                    <h3>Hasil Analisis Sentimen CSV</h3>
+                    <div style="overflow-x:auto;">
+                    <table id="csv-result-table">
+                        <tr>
+                            <th>No</th>
+                            <th>Review</th>
+                            <th>Label</th>
+                            <th>Sentimen</th>
+                        </tr>
+                        {% for row in csv_results %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td style="text-align:left;">{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    </div>
+                    {% if csv_results_all_len > 10 %}
+                        <button id="load-more-btn" type="button" style="margin-top:12px;">Load More</button>
+                    {% endif %}
+                    <div style="margin-top:18px;">
+                        <label for="box-height-slider">Tinggi Box Hasil: </label>
+                        <input type="range" id="box-height-slider" min="100" max="800" value="300" style="vertical-align:middle;">
+                        <span id="box-height-value">300px</span>
+                    </div>
+                {% endif %}
+            </div>
+            {% if csv_results_all_len > 10 %}
+                <script>
+                    window.allCsvResults = {{ csv_results_all|tojson|safe }};
+                    window.csvResultsAllLen = {{ csv_results_all_len|tojson }};
+                </script>
+            {% endif %}
+            <script src="/static/csv_result.js"></script>
+        {% endif %}
+    </div>
+</body>
+</html>

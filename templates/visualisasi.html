@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualisasi Performa Model</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Prediksi Sentimen</a>
+        <a href="/visualisasi">Visualisasi Model</a>
+    </nav>
+    <div class="container">
+        <h2>📊 Performa Model</h2>
+        <h3>Evaluasi di Validation</h3>
+        <table border="1" cellpadding="6" style="border-collapse:collapse;">
+            <tr>
+                <th>Label</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-score</th>
+                <th>Support</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>0.80</td>
+                <td>0.91</td>
+                <td>0.85</td>
+                <td>1440</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>0.90</td>
+                <td>0.76</td>
+                <td>0.83</td>
+                <td>1434</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right;"><b>Accuracy</b></td>
+                <td><b>0.84</b></td>
+            </tr>
+        </table>
+        <br>
+        <h3>Evaluasi di Test</h3>
+        <table border="1" cellpadding="6" style="border-collapse:collapse;">
+            <tr>
+                <th>Label</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-score</th>
+                <th>Support</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>0.80</td>
+                <td>0.92</td>
+                <td>0.86</td>
+                <td>1459</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>0.91</td>
+                <td>0.76</td>
+                <td>0.83</td>
+                <td>1416</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:right;"><b>Accuracy</b></td>
+                <td><b>0.84</b></td>
+            </tr>
+        </table>
+        <br>
+        <h3>Grafik Akurasi Validation vs Test</h3>
+        <div style="display: flex; align-items: flex-end; height: 160px; gap: 40px;">
+            <div style="text-align:center;">
+                <div style="background:#4caf50;width:60px;height:134px;margin-bottom:8px;"></div>
+                <span>Validation<br><b>0.84</b></span>
+            </div>
+            <div style="text-align:center;">
+                <div style="background:#2196f3;width:60px;height:135px;margin-bottom:8px;"></div>
+                <span>Test<br><b>0.84</b></span>
+            </div>
+        </div>
+        <p style="margin-top:16px;">🎯 <b>Final Test Accuracy:</b> 0.8431</p>
+    </div>
+</body>
+</html>
