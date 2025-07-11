@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 import joblib
 import pandas as pd
 import io
+from pymongo import MongoClient
+from collections import Counter
 
 app = Flask(__name__)
 
@@ -66,6 +68,46 @@ def load_more_csv_results():
 @app.route('/visualisasi')
 def visualisasi():
     return render_template('visualisasi.html')
+
+@app.route('/topwords')
+def top_words():
+    # Ganti dengan URI MongoDB Atlas Anda
+    client = MongoClient("mongodb+srv://wikan:masuk123@analisissentimen.nezv7cl.mongodb.net/?retryWrites=true&w=majority&appName=AnalisisSentime")
+    db = client['SentimentAnalysisDB']
+    collection = db['BibitReviewsProcessedTrain']
+
+    # Ambil semua token dari content_no_stopwords
+    all_tokens = []
+    for doc in collection.find({}, {'content_stemmed': 1}):
+        tokens = doc.get('content_stemmed', [])
+        if isinstance(tokens, str):
+            tokens = tokens.split()
+        
+        all_tokens.extend(tokens)
+
+    # Hitung frekuensi kata
+    counter = Counter(all_tokens)
+    top = counter.most_common(10)
+    words = [w for w, c in top]
+    counts = [c for w, c in top]
+
+    return render_template('perDataset.html', words=words, counts=counts)
+
+@app.route('/dataset')
+def dataset():
+    # Ganti dengan path atau query dari database sesuai struktur kamu
+    client = MongoClient("mongodb+srv://wikan:masuk123@analisissentimen.nezv7cl.mongodb.net/?retryWrites=true&w=majority&appName=AnalisisSentime")
+    db = client['SentimentAnalysisDB']
+    collection = db['BibitReviewsProcessedTrain']
+
+    rows = []
+    for doc in collection.find({}, {'content': 1, 'score': 1}).limit(6000):
+        content = doc.get('content', '')
+        label = doc.get('score', '')
+        rows.append((content, label))
+
+    return render_template('dataset.html', dataset=rows)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

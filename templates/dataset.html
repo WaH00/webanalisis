@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Sentimen</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Prediksi Sentimen</a>
+        <a href="/visualisasi">Visualisasi Model</a>
+        <a href="/topwords">Top 10 Kata</a>
+        <a href="/dataset">Lihat Dataset</a>
+    </nav>
+
+    <div class="container">
+        <h2>📄 Penjelasan Dataset</h2>
+        <p>
+            Dataset ini terdiri dari 28000+ ulasan pengguna dari berbagai aplikasi sekuritas di Indonesia. 
+            Setiap entri mencakup teks ulasan (dalam kolom <code>content</code>) dan label sentimen yang diklasifikasikan sebagai:
+        </p>
+        <ul>
+            <li><strong>5</strong> = Positif</li>
+            <li><strong>1</strong> = Negatif</li>
+        </ul>
+
+        <h3>📊 Tabel Data Review</h3>
+        <div style="overflow-x:auto;">
+            <table id="dataset-table" class="display">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Review</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in dataset %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td style="text-align:left;">{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#dataset-table').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                order: [[2, 'desc']],
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ entri",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    paginate: {
+                        next: "Berikutnya",
+                        previous: "Sebelumnya"
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
