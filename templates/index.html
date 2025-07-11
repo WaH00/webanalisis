@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -39,27 +40,34 @@
                 {% else %}
                     <h3>Hasil Analisis Sentimen CSV</h3>
                     <div style="overflow-x:auto;">
-                    <table id="csv-result-table" class="display">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Review</th>
-                                <th>Label</th>
-                                <th>Sentimen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in csv_results_all %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td style="text-align:left;">{{ row[0] }}</td>
-                                <td>{{ row[1] }}</td>
-                                <td>{{ row[2] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                        <table id="csv-result-table" class="display">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Review</th>
+                                    <th>Label</th>
+                                    <th>Sentimen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in csv_results_all %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td style="text-align:left;">{{ row[0] }}</td>
+                                    <td>{{ row[1] }}</td>
+                                    <td>{{ row[2] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+
+                    <!-- Tambahkan Chart di bawah tabel -->
+                    <div style="margin-top:40px;">
+                        <h3>Distribusi Sentimen</h3>
+                        <canvas id="sentimentChart" height="200"></canvas>
+                    </div>
+
                     <div style="margin-top:18px;">
                         <label for="box-height-slider">Tinggi Box Hasil: </label>
                         <input type="range" id="box-height-slider" min="100" max="800" value="300" style="vertical-align:middle;">
@@ -69,6 +77,7 @@
             </div>
         {% endif %}
     </div>
+
     <script src="/static/csv_result.js"></script>
     <!-- jQuery & DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -91,6 +100,26 @@
                     }
                 });
             }
+
+            {% if csv_results %}
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            const sentimentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Negatif', 'Positif'],
+                    datasets: [{
+                        label: 'Jumlah',
+                        data: [{{ negative_count }}, {{ positive_count }}],
+                        backgroundColor: ['#f44336', '#4caf50']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+            {% endif %}
         });
     </script>
 </body>

@@ -16,13 +16,14 @@ def index():
     prediction = None
     csv_results = None
     csv_results_all = []
+    positive_count = 0
+    negative_count = 0
+
     if request.method == 'POST':
-        # Cek apakah upload file atau input manual
         if 'csv_file' in request.files and request.files['csv_file'].filename != '':
             file = request.files['csv_file']
             try:
                 df = pd.read_csv(file)
-                # Asumsi kolom review bernama 'review'
                 if 'review' not in df.columns:
                     csv_results = {'error': "Kolom 'review' tidak ditemukan di file CSV."}
                 else:
@@ -30,10 +31,15 @@ def index():
                     vectors = vectorizer.transform(texts)
                     labels = model.predict(vectors)
                     sentiments = ["Positif" if l == 5 else "Negatif" for l in labels]
-                    # Konversi labels ke int
                     labels = [int(l) for l in labels]
                     csv_results_all = list(zip(texts, labels, sentiments))
-                    csv_results = csv_results_all[:10]  # hanya 10 pertama
+                    csv_results = csv_results_all[:10]
+
+                    # ✅ Hitung jumlah Positif & Negatif
+                    counter = Counter(sentiments)
+                    positive_count = counter.get("Positif", 0)
+                    negative_count = counter.get("Negatif", 0)
+
             except Exception as e:
                 csv_results = {'error': f"Gagal membaca file: {e}"}
         else:
@@ -43,12 +49,15 @@ def index():
                 label = model.predict(vector)[0]
                 sentiment = "Positif" if label == 5 else "Negatif"
                 prediction = f"Hasil: {sentiment} (Label: {label})"
+
     return render_template(
         'index.html',
         prediction=prediction,
         csv_results=csv_results,
         csv_results_all=csv_results_all,
-        csv_results_all_len=int(len(csv_results_all))  # pastikan int asli
+        csv_results_all_len=int(len(csv_results_all)),
+        positive_count=positive_count,
+        negative_count=negative_count
     )
 
 @app.route('/load_more_csv_results', methods=['POST'])
@@ -72,7 +81,7 @@ def visualisasi():
 @app.route('/topwords')
 def top_words():
     # Ganti dengan URI MongoDB Atlas Anda
-    client = MongoClient("mongodb+srv://wikan:masuk123@analisissentimen.nezv7cl.mongodb.net/?retryWrites=true&w=majority&appName=AnalisisSentime")
+    client = MongoClient("mongodb+srv://wikan:masuk123@analisissentimen.nezv7cl.mongodb.net/?retryWrites=true&w=majority&appName=AnalisisSentimen")
     db = client['SentimentAnalysisDB']
     collection = db['BibitReviewsProcessedTrain']
 
@@ -93,9 +102,10 @@ def top_words():
 
     return render_template('perDataset.html', words=words, counts=counts)
 
+    
+
 @app.route('/dataset')
 def dataset():
-    # Ganti dengan path atau query dari database sesuai struktur kamu
     client = MongoClient("mongodb+srv://wikan:masuk123@analisissentimen.nezv7cl.mongodb.net/?retryWrites=true&w=majority&appName=AnalisisSentime")
     db = client['SentimentAnalysisDB']
     collection = db['BibitReviewsProcessedTrain']
@@ -106,7 +116,13 @@ def dataset():
         label = doc.get('score', '')
         rows.append((content, label))
 
-    return render_template('dataset.html', dataset=rows)
+    score_1_count = collection.count_documents({'score': 1})
+    score_5_count = collection.count_documents({'score': 5})
+
+    return render_template('dataset.html',
+                           dataset=rows,
+                           scores=[1, 5],
+                           score_counts=[score_1_count, score_5_count])
 
 
 if __name__ == '__main__':
