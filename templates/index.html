@@ -15,8 +15,10 @@
         <a href="/topwords">Top 10 Kata</a>
         <a href="/dataset">Lihat Dataset</a>
     </nav>
+
     <div class="container">
         <h1>🧠 Sentiment Analysis Pada Aplikasi Sekuritas di Indonesia (Naive Bayes)</h1>
+
         <form method="POST" enctype="multipart/form-data">
             <textarea name="review" rows="5" placeholder="Masukkan teks review..."></textarea><br>
             <button type="submit">Prediksi</button>
@@ -62,28 +64,136 @@
                         </table>
                     </div>
 
-                    <!-- Tambahkan Chart di bawah tabel -->
+                    <!-- Bar Chart Distribusi Sentimen -->
                     <div style="margin-top:40px;">
                         <h3>Distribusi Sentimen</h3>
                         <canvas id="sentimentChart" height="200"></canvas>
                     </div>
 
-                    <div style="margin-top:18px;">
-                        <label for="box-height-slider">Tinggi Box Hasil: </label>
-                        <input type="range" id="box-height-slider" min="100" max="800" value="300" style="vertical-align:middle;">
-                        <span id="box-height-value">300px</span>
+                    <!-- 📏 Statistik Panjang Review -->
+                    <div style="margin-top:40px;">
+                        <h3>📏 Statistik Panjang Review</h3>
+                        <ul>
+                            <li>Rata-rata panjang review: <strong>{{ avg_length }}</strong> kata</li>
+                            <li>Review terpendek: <strong>{{ min_length }}</strong> kata</li>
+                            <li>Review terpanjang: <strong>{{ max_length }}</strong> kata</li>
+                        </ul>
                     </div>
+                    <!-- ✅ 4. Rata-rata Panjang Review per Sentimen -->
+                    <div style="margin-top:20px;">
+                        <h3>📏 Rata-rata Panjang Review per Sentimen</h3>
+                        <ul>
+                            <li>Positif: <strong>{{ avg_length_per_sentiment['Positif'] | default('0') }}</strong> kata</li>
+                            <li>Negatif: <strong>{{ avg_length_per_sentiment['Negatif'] | default('0') }}</strong> kata</li>
+                        </ul>
+                    </div>
+                    <!-- ✅ 2. Contoh Review Positif & Negatif -->
+                    <div style="margin-top:40px;">
+                        <h3>💬 Contoh Review Positif & Negatif</h3>
+                        <div style="display:flex; gap:40px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:300px;">
+                                <h4 style="color:#4caf50;">Positif</h4>
+                                <ul>
+                                    {% for text in contoh_review_positif %}
+                                        <li>"{{ text }}"</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div style="flex:1; min-width:300px;">
+                                <h4 style="color:#f44336;">Negatif</h4>
+                                <ul>
+                                    {% for text in contoh_review_negatif %}
+                                        <li>"{{ text }}"</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ✅ 3. Kata Unik dalam Review Positif & Negatif -->
+                    <div style="margin-top:40px;">
+                        <h3>🧩 Kata Unik dalam Review Positif & Negatif</h3>
+                        <p>Kata-kata berikut hanya muncul di review positif atau negatif, dan dapat dianggap sebagai ciri khas dari masing-masing kelompok.</p>
+                        <div style="display:flex; gap:40px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:300px;">
+                                <h4 style="color:#4caf50;">Hanya di Positif</h4>
+                                <ul>
+                                    {% for word in unique_pos %}
+                                        <li>{{ word }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div style="flex:1; min-width:300px;">
+                                <h4 style="color:#f44336;">Hanya di Negatif</h4>
+                                <ul>
+                                    {% for word in unique_neg %}
+                                        <li>{{ word }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 📊 Histogram Panjang Review -->
+                    <div style="margin-top:20px;">
+                        <h3>📊 Distribusi Panjang Review per Sentimen</h3>
+                        <canvas id="lengthHistogramChart" height="200"></canvas>
+                    </div>
+                    
+                    <!-- 🔠 Top Words -->
+                    {% if top_words_positive %}
+                        <div style="margin-top:30px;">
+                            <h3>🔠 Top 10 Kata Positif (TF-IDF)</h3>
+                            <p style="max-width: 700px;">
+                                Kata-kata berikut adalah yang paling mewakili review <strong>positif</strong> berdasarkan data yang diunggah. 
+                                Skor TF-IDF di sebelah kanan menunjukkan seberapa <em>penting dan khas</em> kata tersebut dalam review positif. 
+                                Semakin tinggi nilainya, semakin sering dan unik kata itu muncul di review yang bernada positif.
+                            </p>
+                            <table class="display">
+                                <thead><tr><th>Kata</th><th>Skor</th></tr></thead>
+                                <tbody>
+                                    {% for word, score in top_words_positive %}
+                                    <tr>
+                                        <td>{{ word }}</td>
+                                        <td>{{ score }}<span title="Semakin tinggi skor TF-IDF, semakin penting kata ini dalam mewakili sentimen."></span></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    {% if top_words_negative %}
+                        <div style="margin-top:30px;">
+                            <h3>🔠 Top 10 Kata Negatif (TF-IDF)</h3>
+                            <p style="max-width: 700px;">
+                                Di bawah ini adalah kata-kata yang paling sering muncul dalam review <strong>negatif</strong> dan dianggap paling mewakili sentimen negatif. 
+                                TF-IDF membantu menemukan kata yang <em>tidak hanya sering muncul, tapi juga khas</em> untuk kelompok review tersebut.
+                            </p>
+                            <table class="display">
+                                <thead><tr><th>Kata</th><th>Skor</th></tr></thead>
+                                <tbody>
+                                    {% for word, score in top_words_negative %}
+                                    <tr>
+                                        <td>{{ word }}</td>
+                                        <td>{{ score }}<span title="Semakin tinggi skor TF-IDF, semakin penting kata ini dalam mewakili sentimen."></span></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}
     </div>
 
-    <script src="/static/csv_result.js"></script>
-    <!-- jQuery & DataTables -->
+    <!-- DataTables & jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (document.getElementById('csv-result-table')) {
                 $('#csv-result-table').DataTable({
                     "pageLength": 10,
@@ -91,36 +201,36 @@
                     "ordering": false,
                     "language": {
                         "search": "Filter:",
-                        "lengthMenu": "Show _MENU_ per page",
-                        "info": "_START_ to _END_ of _TOTAL_ entries",
+                        "lengthMenu": "Tampilkan _MENU_ per halaman",
+                        "info": "_START_ ke _END_ dari _TOTAL_ entri",
                         "paginate": {
-                            "next": "Next",
-                            "previous": "Prev"
+                            "next": "Berikutnya",
+                            "previous": "Sebelumnya"
                         }
                     }
                 });
             }
-
-            {% if csv_results %}
-            const ctx = document.getElementById('sentimentChart').getContext('2d');
-            const sentimentChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Negatif', 'Positif'],
-                    datasets: [{
-                        label: 'Jumlah',
-                        data: [{{ negative_count }}, {{ positive_count }}],
-                        backgroundColor: ['#f44336', '#4caf50']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                }
-            });
-            {% endif %}
         });
     </script>
+
+    <!-- Inject data untuk JS modular -->
+    <script>
+        {% if csv_results %}
+            window.sentimentCounts = {
+                positive: {{ positive_count }},
+                negative: {{ negative_count }}
+            };
+        {% endif %}
+
+        {% if length_by_sentiment %}
+            window.lengthData = {
+                pos: {{ length_by_sentiment['Positif'] | safe }},
+                neg: {{ length_by_sentiment['Negatif'] | safe }}
+            };
+        {% endif %}
+    </script>
+
+    <!-- Modular JS -->
+    <script type="module" src="/static/js/main.js"></script>
 </body>
 </html>
